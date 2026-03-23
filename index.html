@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EntHelper – Smart Exam Prep for Kazakhstan Students</title>
+  <meta name="description" content="AI-powered study assistant for UNT exam preparation. Generate notes, flashcards, quizzes, and mind maps automatically." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<!-- ONBOARDING OVERLAY -->
+<div id="onboarding" class="onboarding-overlay" style="display:none">
+  <div class="onboarding-card">
+    <div class="onboarding-logo">
+      <div class="logo-icon">🎓</div>
+      <span class="logo-text">Ent<span class="gradient-text">Helper</span></span>
+    </div>
+    <div class="onboarding-slides">
+      <div class="slide active" id="slide-0">
+        <div class="slide-emoji">🚀</div>
+        <h2>Welcome to EntHelper</h2>
+        <p>Your personal AI tutor for the Unified National Testing. Study smarter, not harder.</p>
+      </div>
+      <div class="slide" id="slide-1">
+        <div class="slide-emoji">✨</div>
+        <h2>AI-Powered Learning</h2>
+        <p>Upload your textbooks or notes. Our AI instantly creates summaries, flashcards, and quizzes tailored for you.</p>
+      </div>
+      <div class="slide" id="slide-2">
+        <div class="slide-emoji">🏆</div>
+        <h2>Track & Earn Rewards</h2>
+        <p>Build study streaks, earn XP points, and level up as you master each UNT subject.</p>
+      </div>
+      <div class="slide" id="slide-3">
+        <div class="slide-emoji">📚</div>
+        <h2 data-i18n="onboarding.subjectsTitle">Choose Your ENT Subjects</h2>
+
+        <p class="ent-section-label" data-i18n="onboarding.mandatoryLabel">Mandatory subjects (required for all):</p>
+        <div class="subject-grid-onboarding ent-mandatory">
+          <div class="subj-chip selected locked" data-subj="kazHistory">🏛️ Kazakhstan History</div>
+          <div class="subj-chip selected locked" data-subj="mathLiteracy">📐 Math Literacy</div>
+          <div class="subj-chip selected locked" data-subj="readingLiteracy">📖 Reading Literacy</div>
+        </div>
+
+        <p class="ent-section-label" data-i18n="onboarding.profileLabel">Profile subjects (choose exactly 2):</p>
+        <div class="subject-grid-onboarding ent-profile" id="ent-profile-grid">
+          <div class="subj-chip" data-subj="mathematics">📊 Mathematics</div>
+          <div class="subj-chip" data-subj="physics">⚡ Physics</div>
+          <div class="subj-chip" data-subj="biology">🌿 Biology</div>
+          <div class="subj-chip" data-subj="chemistry">🧪 Chemistry</div>
+          <div class="subj-chip" data-subj="geography">🌍 Geography</div>
+          <div class="subj-chip" data-subj="english">🇬🇧 English</div>
+          <div class="subj-chip" data-subj="worldHistory">🌐 World History</div>
+          <div class="subj-chip" data-subj="informatics">💻 Informatics</div>
+        </div>
+        <p class="ent-selection-count" id="ent-count">0 / 2 selected</p>
+      </div>
+    </div>
+    <div class="onboarding-dots">
+      <span class="dot active" data-target="0"></span>
+      <span class="dot" data-target="1"></span>
+      <span class="dot" data-target="2"></span>
+      <span class="dot" data-target="3"></span>
+    </div>
+    <div class="onboarding-actions">
+      <button id="onboarding-skip" class="btn-ghost">Skip</button>
+      <button id="onboarding-next" class="btn-primary">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div class="app-shell" id="app-shell" style="display:none;">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon-sm">🎓</div>
+      <span class="logo-text-sm">Ent<span class="gradient-text">Helper</span></span>
+    </div>
+
+    <div class="user-card" id="user-card">
+      <div class="user-avatar" id="user-avatar">ST</div>
+      <div class="user-info">
+        <div class="user-name" id="user-name">Student</div>
+        <div class="user-level">
+          <span class="level-badge" id="user-level-badge">Lv.1</span>
+          <span class="xp-text" id="user-xp-text">0 XP</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="streak-banner" id="streak-banner">
+      <span class="streak-fire">🔥</span>
+      <div>
+        <div class="streak-count" id="streak-count">0 day streak!</div>
+        <div class="streak-sub">Keep it up!</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-page="dashboard">
+        <span class="nav-icon">🏠</span><span class="nav-label" data-i18n="nav.dashboard">Dashboard</span>
+      </a>
+      <a href="#" class="nav-item" data-page="notes">
+        <span class="nav-icon">📝</span><span class="nav-label" data-i18n="nav.notes">Notes & Cards</span>
+      </a>
+      <a href="#" class="nav-item" data-page="summaries">
+        <span class="nav-icon">✨</span><span class="nav-label">AI Summaries</span>
+      </a>
+      <a href="#" class="nav-item" data-page="tests">
+        <span class="nav-icon">📋</span><span class="nav-label">Test Generator</span>
+      </a>
+      <a href="#" class="nav-item" data-page="audio">
+        <span class="nav-icon">🎧</span><span class="nav-label">Audio Recap</span>
+      </a>
+      <a href="#" class="nav-item" data-page="mindmap">
+        <span class="nav-icon">🗺️</span><span class="nav-label">Mind Maps</span>
+      </a>
+      <a href="#" class="nav-item" data-page="progress">
+        <span class="nav-icon">📊</span><span class="nav-label">Progress</span>
+      </a>
+      <a href="#" class="nav-item" data-page="subjects">
+        <span class="nav-icon">📂</span><span class="nav-label">Subjects</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="xp-bar-wrap">
+        <div class="xp-bar-label"><span id="xp-bar-level">Level 1</span><span id="xp-bar-text">0 / 3000 XP</span></div>
+        <div class="xp-bar"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+      </div>
+      <button class="btn-ghost full-btn" onclick="openSettings()" style="margin-bottom:8px">⚙️ <span data-i18n="settings.title">Settings</span></button>
+      <button class="btn-ghost full-btn" id="sidebar-logout" onclick="handleLogout()" style="color:var(--danger)">🚪 <span data-i18n="auth.logout">Log Out</span></button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+      <div class="topbar-search">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="global-search" placeholder="Search notes, cards, tests…" />
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" title="Notifications">🔔</button>
+        <button class="icon-btn" title="Settings">⚙️</button>
+      </div>
+    </div>
+
+    <!-- PAGE: DASHBOARD -->
+    <section class="page active" id="page-dashboard">
+      <div class="page-header">
+        <h1>Good evening, Aibek! 👋</h1>
+        <p class="page-sub">UNT is in <strong>47 days</strong>. Let's make the most of today.</p>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg,#667eea,#764ba2)">📚</div>
+          <div class="stat-info">
+            <div class="stat-value">143</div>
+            <div class="stat-label">Notes Created</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg,#f093fb,#f5576c)">🃏</div>
+          <div class="stat-info">
+            <div class="stat-value">526</div>
+            <div class="stat-label">Flashcards</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg,#4facfe,#00f2fe)">✅</div>
+          <div class="stat-info">
+            <div class="stat-value">38</div>
+            <div class="stat-label">Tests Taken</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg,#43e97b,#38f9d7)">⭐</div>
+          <div class="stat-info">
+            <div class="stat-value">84%</div>
+            <div class="stat-label">Avg. Score</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="dash-card col-2">
+          <div class="card-header">
+            <h3>📈 Weekly Activity</h3>
+            <select class="mini-select"><option>This Week</option><option>Last Week</option></select>
+          </div>
+          <canvas id="activityChart" height="130"></canvas>
+        </div>
+
+        <div class="dash-card">
+          <div class="card-header"><h3 data-i18n="dashboard.recentActivity">🕒 Recent Activity</h3></div>
+          <div class="goals-list" id="recent-activity-list">
+            <div style="padding:20px;text-align:center;color:var(--text3);font-size:0.9rem">
+              <span class="spinner" id="dashboard-activity-loader" style="display:none"></span>
+              <span id="dashboard-activity-empty">No activity yet. Start generating AI content!</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-card col-2">
+          <div class="card-header"><h3>📚 Continue Studying</h3>
+            <a href="#" class="link-btn" data-page="subjects" data-i18n="dashboard.viewAll">View all</a>
+          </div>
+          <div class="continue-grid" id="dashboard-subjects-grid">
+            <!-- Dynamically populated from selectedSubjects in app.js -->
+          </div>
+        </div>
+
+        <div class="dash-card">
+          <div class="card-header"><h3>🏅 Achievements</h3></div>
+          <div class="badges-grid">
+            <div class="badge-item earned" title="First Note Created">📝</div>
+            <div class="badge-item earned" title="7-Day Streak">🔥</div>
+            <div class="badge-item earned" title="Quiz Master">🏆</div>
+            <div class="badge-item earned" title="Speed Reader">⚡</div>
+            <div class="badge-item earned" title="Mind Mapper">🗺️</div>
+            <div class="badge-item" title="Perfect Score (locked)">🔒</div>
+            <div class="badge-item" title="30-Day Streak (locked)">🔒</div>
+            <div class="badge-item" title="Subject Master (locked)">🔒</div>
+          </div>
+          <div class="badges-sub">5 of 12 earned</div>
+        </div>
+
+        <div class="dash-card">
+          <div class="card-header"><h3>📅 UNT Countdown</h3></div>
+          <div class="countdown-wrap">
+            <div class="countdown-big">47</div>
+            <div class="countdown-label">days remaining</div>
+            <div class="countdown-date">June 4, 2026</div>
+            <div class="subject-scores">
+              <div class="ss-row"><span>Math</span><div class="ss-bar"><div style="width:72%"></div></div><span>72%</span></div>
+              <div class="ss-row"><span>CS</span><div class="ss-bar"><div style="width:55%"></div></div><span>55%</span></div>
+              <div class="ss-row"><span>History</span><div class="ss-bar"><div style="width:40%"></div></div><span>40%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE: NOTES & CARDS -->
+    <section class="page" id="page-notes">
+      <div class="page-header">
+        <h1>📝 Notes & Flashcards</h1>
+        <p class="page-sub">Upload material or paste text to auto-generate smart notes and cards.</p>
+      </div>
+
+      <div class="notes-layout">
+        <div class="notes-left">
+          <div class="upload-area" id="upload-area">
+            <div class="upload-icon">📄</div>
+            <h3>Upload Study Material</h3>
+            <p>Drag & drop PDF, text files, or paste content below</p>
+            <button class="btn-primary" onclick="document.getElementById('file-input').click()">Choose File</button>
+            <input type="file" id="file-input" hidden accept=".txt,.pdf" />
+            <div class="or-divider">or</div>
+            <textarea id="paste-input" placeholder="Paste your notes, textbook excerpts, or any study material here…" rows="6"></textarea>
+            <button class="btn-primary full-btn" id="generate-btn" onclick="generateContent()">
+              <span>✨ Generate with AI</span>
+            </button>
+          </div>
+
+          <div class="ai-loading-bar" id="ai-loader" style="display:none">
+            <div class="ai-loader-inner">
+              <div class="ai-pulse">🤖 AI is analyzing your content…</div>
+              <div class="progress-bar"><div class="progress-fill"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="notes-right">
+          <div class="tabs">
+            <button class="tab active" data-tab="notes-content">📝 Notes</button>
+            <button class="tab" data-tab="cards-content">🃏 Flashcards</button>
+          </div>
+
+          <div class="tab-content active" id="notes-content">
+            <div class="note-list" id="note-list">
+              <div class="note-item">
+                <div class="note-item-header">
+                  <span class="note-tag math">Math</span>
+                  <span class="note-date">Today</span>
+                </div>
+                <h4>Quadratic Equations</h4>
+                <p>A quadratic equation is an equation of the form ax² + bx + c = 0 where a ≠ 0. The solutions can be found using the quadratic formula: x = (-b ± √(b²-4ac)) / 2a. The discriminant D = b²-4ac determines the nature of roots.</p>
+                <div class="note-actions">
+                  <button class="tiny-btn">🃏 Make Cards</button>
+                  <button class="tiny-btn">🔊 Listen</button>
+                  <button class="tiny-btn">📋 Quiz</button>
+                </div>
+              </div>
+              <div class="note-item">
+                <div class="note-item-header">
+                  <span class="note-tag cs">CS</span>
+                  <span class="note-date">Yesterday</span>
+                </div>
+                <h4>Binary Search Algorithm</h4>
+                <p>Binary search finds the position of a target value in a sorted array. It compares the target to the middle element, then eliminates half the remaining elements. Time complexity: O(log n). Space complexity: O(1) iterative, O(log n) recursive.</p>
+                <div class="note-actions">
+                  <button class="tiny-btn">🃏 Make Cards</button>
+                  <button class="tiny-btn">🔊 Listen</button>
+                  <button class="tiny-btn">📋 Quiz</button>
+                </div>
+              </div>
+              <div class="note-item">
+                <div class="note-item-header">
+                  <span class="note-tag history">History</span>
+                  <span class="note-date">2 days ago</span>
+                </div>
+                <h4>Independence of Kazakhstan (1991)</h4>
+                <p>Kazakhstan declared independence on December 16, 1991, following the dissolution of the Soviet Union. Nursultan Nazarbayev became the first president. The country joined the UN in March 1992 and adopted its current constitution in 1995.</p>
+                <div class="note-actions">
+                  <button class="tiny-btn">🃏 Make Cards</button>
+                  <button class="tiny-btn">🔊 Listen</button>
+                  <button class="tiny-btn">📋 Quiz</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="cards-content">
+            <div class="flashcard-session">
+              <div class="fc-counter">Card 1 of 12 · Math</div>
+              <div class="flashcard" id="flashcard" onclick="flipCard()">
+                <div class="card-face front">
+                  <div class="card-label">QUESTION</div>
+                  <div class="card-text">What is the quadratic formula used for?</div>
+                  <div class="card-hint">Click to reveal answer</div>
+                </div>
+                <div class="card-face back">
+                  <div class="card-label">ANSWER</div>
+                  <div class="card-text">Finding the roots of a quadratic equation ax² + bx + c = 0 using x = (-b ± √(b²-4ac)) / 2a</div>
+                </div>
+              </div>
+              <div class="fc-actions">
+                <button class="fc-btn wrong" id="fc-wrong" onclick="nextCard('wrong')">✗ Again</button>
+                <button class="fc-btn hard" onclick="nextCard('hard')">~ Hard</button>
+                <button class="fc-btn good" onclick="nextCard('good')">✓ Good</button>
+                <button class="fc-btn easy" onclick="nextCard('easy')">★ Easy</button>
+              </div>
+              <div class="fc-stats">
+                <span class="fc-stat wrong-stat">Again: 2</span>
+                <span class="fc-stat hard-stat">Hard: 1</span>
+                <span class="fc-stat good-stat">Good: 4</span>
+                <span class="fc-stat easy-stat">Easy: 5</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE: AI SUMMARIES -->
+    <section class="page" id="page-summaries">
+      <div class="page-header">
+        <h1>✨ AI Summaries</h1>
+        <p class="page-sub">Get intelligent summaries in the format that works best for you.</p>
+      </div>
+
+      <div class="summary-layout">
+        <div class="summary-input-col">
+          <h3>Input Material</h3>
+          <textarea id="summary-input" placeholder="Paste your study material here to summarize…" rows="12">The development of computing began with mechanical calculators in the 17th century. Charles Babbage designed the Analytical Engine in the 1830s, considered the first general-purpose computer concept. Ada Lovelace wrote the first algorithm for this machine, making her the first programmer. The ENIAC, built in 1945, was the first programmable electronic computer. The transistor's invention in 1947 led to smaller, faster machines. The microprocessor by Intel in 1971 revolutionized computing, leading to personal computers in the 1980s. The internet's public availability in 1991 transformed global communication. Today, AI and quantum computing represent the next frontier.</textarea>
+          <div class="summary-mode-label">Summary Mode:</div>
+          <div class="summary-modes">
+            <button class="mode-btn active" data-mode="short">⚡ Short</button>
+            <button class="mode-btn" data-mode="detailed">📖 Detailed</button>
+            <button class="mode-btn" data-mode="bullets">• Bullet Points</button>
+            <button class="mode-btn" data-mode="eli5">😊 Simple</button>
+          </div>
+          <button class="btn-primary full-btn" onclick="generateSummary()">✨ Generate Summary</button>
+        </div>
+
+        <div class="summary-output-col">
+          <div class="summary-output-card" id="summary-output">
+            <div class="summary-badge">✨ AI Generated · Short Mode</div>
+            <h3>History of Computing</h3>
+            <p>Computing evolved from mechanical calculators (1600s) → Babbage's Analytical Engine (1830s) → ENIAC vacuum tube computer (1945) → transistor revolution (1947) → Intel microprocessor (1971) → personal computers (1980s) → public internet (1991) → today's AI & quantum era.</p>
+            <div class="summary-actions">
+              <button class="tiny-btn" onclick="navigateTo('audio')">🔊 Listen to Summary</button>
+              <button class="tiny-btn">🃏 Make Flashcards</button>
+              <button class="tiny-btn">📋 Create Quiz</button>
+              <button class="tiny-btn">📄 Copy Text</button>
+            </div>
+          </div>
+
+          <div class="key-concepts-card">
+            <h4>🔑 Key Concepts Extracted</h4>
+            <div class="concepts-list">
+              <span class="concept-tag">ENIAC (1945)</span>
+              <span class="concept-tag">Transistor (1947)</span>
+              <span class="concept-tag">Microprocessor</span>
+              <span class="concept-tag">Ada Lovelace</span>
+              <span class="concept-tag">Charles Babbage</span>
+              <span class="concept-tag">Internet (1991)</span>
+              <span class="concept-tag">Quantum Computing</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE: TEST GENERATOR -->
+    <section class="page" id="page-tests">
+      <div class="page-header">
+        <h1>📋 Test Generator</h1>
+        <p class="page-sub">Auto-generate UNT-style quizzes and track your performance.</p>
+      </div>
+
+      <div id="test-setup" class="test-setup">
+        <div class="test-config-grid">
+          <div class="config-card">
+            <h3>Subject</h3>
+            <div class="config-options">
+              <button class="config-opt active" data-config="subject" data-val="math">📐 Math</button>
+              <button class="config-opt" data-config="subject" data-val="cs">💻 CS</button>
+              <button class="config-opt" data-config="subject" data-val="history">🏛️ History</button>
+              <button class="config-opt" data-config="subject" data-val="biology">🌿 Biology</button>
+            </div>
+          </div>
+          <div class="config-card">
+            <h3>Question Types</h3>
+            <div class="config-options">
+              <button class="config-opt active" data-config="type" data-val="mcq">Multiple Choice</button>
+              <button class="config-opt active" data-config="type" data-val="tf">True / False</button>
+              <button class="config-opt" data-config="type" data-val="open">Open-Ended</button>
+            </div>
+          </div>
+          <div class="config-card">
+            <h3>Difficulty</h3>
+            <div class="config-options">
+              <button class="config-opt" data-config="diff" data-val="easy">🟢 Easy</button>
+              <button class="config-opt active" data-config="diff" data-val="medium">🟡 Medium</button>
+              <button class="config-opt" data-config="diff" data-val="hard">🔴 Hard</button>
+            </div>
+          </div>
+          <div class="config-card">
+            <h3>Questions</h3>
+            <div class="count-control">
+              <button onclick="adjustCount(-5)">−</button>
+              <span id="q-count">10</span>
+              <button onclick="adjustCount(5)">+</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn-primary btn-lg" onclick="startTest()">🚀 Generate & Start Test</button>
+      </div>
+
+      <div id="test-active" class="test-active" style="display:none">
+        <div class="test-header-bar">
+          <div class="test-info">
+            <span id="test-q-num">Question 1 of 10</span>
+            <span class="test-subject-badge">📐 Math</span>
+          </div>
+          <div class="test-timer" id="test-timer">⏱ 15:00</div>
+        </div>
+        <div class="test-progress-bar"><div class="test-progress-fill" id="test-progress-fill"></div></div>
+
+        <div class="question-card" id="question-card">
+          <!-- Filled by JS -->
+        </div>
+
+        <div class="test-nav">
+          <button class="btn-ghost" onclick="prevQuestion()">← Previous</button>
+          <div class="q-dots" id="q-dots"></div>
+          <button class="btn-primary" id="next-btn" onclick="nextQuestion()">Next →</button>
+        </div>
+      </div>
+
+      <div id="test-results" class="test-results" style="display:none">
+        <!-- Filled by JS -->
+      </div>
+    </section>
+
+    <!-- PAGE: AUDIO RECAP -->
+    <section class="page" id="page-audio">
+      <div class="page-header">
+        <h1>🎧 Audio Recap</h1>
+        <p class="page-sub">Listen to AI-narrated summaries and notes on the go.</p>
+      </div>
+
+      <div class="audio-layout">
+        <div class="audio-player-card">
+          <div class="audio-art">
+            <div class="audio-art-inner">📚</div>
+            <div class="audio-waves">
+              <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+              <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+              <div class="wave-bar"></div><div class="wave-bar"></div>
+            </div>
+          </div>
+          <div class="audio-info">
+            <div class="audio-badge">History of Kazakhstan</div>
+            <h2 class="audio-title">Independence & Modern Era</h2>
+            <p class="audio-sub">AI Generated Summary · 4 min 32 sec</p>
+          </div>
+          <div class="audio-progress">
+            <span class="audio-time-cur" id="audio-cur">1:24</span>
+            <div class="audio-track" id="audio-track" onclick="seekAudio(event)">
+              <div class="audio-track-fill" id="audio-fill" style="width:31%"></div>
+              <div class="audio-thumb" id="audio-thumb" style="left:31%"></div>
+            </div>
+            <span class="audio-time-total">4:32</span>
+          </div>
+          <div class="audio-controls">
+            <button class="audio-btn" title="Rewind 10s" onclick="audioRewind()">⏮ 10s</button>
+            <button class="audio-play-btn" id="play-btn" onclick="togglePlay()">▶</button>
+            <button class="audio-btn" title="Forward 10s" onclick="audioForward()">10s ⏭</button>
+          </div>
+          <div class="audio-extras">
+            <div class="speed-control">
+              <label>Speed</label>
+              <div class="speed-btns">
+                <button class="speed-btn" data-speed="0.75">0.75×</button>
+                <button class="speed-btn active" data-speed="1">1×</button>
+                <button class="speed-btn" data-speed="1.25">1.25×</button>
+                <button class="speed-btn" data-speed="1.5">1.5×</button>
+                <button class="speed-btn" data-speed="2">2×</button>
+              </div>
+            </div>
+            <button class="bg-listen-btn" id="bg-listen-btn" onclick="toggleBgListen()">
+              🎵 Background Mode
+            </button>
+          </div>
+        </div>
+
+        <div class="audio-playlist">
+          <h3>Your Audio Library</h3>
+          <div class="playlist-list">
+            <div class="playlist-item active">
+              <div class="pl-icon">🏛️</div>
+              <div class="pl-info">
+                <div class="pl-title">History: Independence Era</div>
+                <div class="pl-sub">4:32 · History</div>
+              </div>
+              <div class="pl-play">▶</div>
+            </div>
+            <div class="playlist-item">
+              <div class="pl-icon">📐</div>
+              <div class="pl-info">
+                <div class="pl-title">Math: Quadratic Equations</div>
+                <div class="pl-sub">3:18 · Math</div>
+              </div>
+              <div class="pl-play">▶</div>
+            </div>
+            <div class="playlist-item">
+              <div class="pl-icon">💻</div>
+              <div class="pl-info">
+                <div class="pl-title">CS: Sorting Algorithms</div>
+                <div class="pl-sub">5:47 · Computer Science</div>
+              </div>
+              <div class="pl-play">▶</div>
+            </div>
+            <div class="playlist-item">
+              <div class="pl-icon">🌿</div>
+              <div class="pl-info">
+                <div class="pl-title">Biology: Cell Division</div>
+                <div class="pl-sub">4:02 · Biology</div>
+              </div>
+              <div class="pl-play">▶</div>
+            </div>
+          </div>
+          <button class="btn-primary full-btn" onclick="generateAudio()">✨ Generate New Audio</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE: MIND MAP -->
+    <section class="page" id="page-mindmap">
+      <div class="page-header">
+        <h1>🗺️ Mind Maps</h1>
+        <p class="page-sub">Visualize topic connections and understand the big picture.</p>
+      </div>
+
+      <div class="mindmap-layout">
+        <div class="mindmap-controls">
+          <select id="mindmap-subject" onchange="renderMindmap()">
+            <option value="cs">Computer Science</option>
+            <option value="math">Mathematics</option>
+            <option value="history">History of Kazakhstan</option>
+          </select>
+          <button class="btn-primary" onclick="renderMindmap()">🔄 Regenerate</button>
+        </div>
+        <div class="mindmap-container" id="mindmap-container">
+          <!-- SVG mind map rendered by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE: PROGRESS -->
+    <section class="page" id="page-progress">
+      <div class="page-header">
+        <h1>📊 Progress Tracking</h1>
+        <p class="page-sub">Monitor your performance and identify weak areas.</p>
+      </div>
+
+      <div class="progress-layout">
+        <div class="progress-top-row">
+          <div class="prog-stat-card">
+            <div class="prog-stat-icon">🔥</div>
+            <div class="prog-stat-value">12</div>
+            <div class="prog-stat-label">Day Streak</div>
+          </div>
+          <div class="prog-stat-card">
+            <div class="prog-stat-icon">⭐</div>
+            <div class="prog-stat-value">2,340</div>
+            <div class="prog-stat-label">Total XP</div>
+          </div>
+          <div class="prog-stat-card">
+            <div class="prog-stat-icon">🏆</div>
+            <div class="prog-stat-value">Level 7</div>
+            <div class="prog-stat-label">Current Level</div>
+          </div>
+          <div class="prog-stat-card">
+            <div class="prog-stat-icon">⏱️</div>
+            <div class="prog-stat-value">47h</div>
+            <div class="prog-stat-label">Study Time</div>
+          </div>
+        </div>
+
+        <div class="progress-charts-row">
+          <div class="prog-chart-card">
+            <h3>Subject Performance</h3>
+            <canvas id="subjectChart" height="200"></canvas>
+          </div>
+          <div class="prog-chart-card">
+            <h3>30-Day Study Activity</h3>
+            <canvas id="heatmapChart" height="200"></canvas>
+          </div>
+        </div>
+
+        <div class="weak-areas-card">
+          <h3>⚠️ Weak Areas to Focus On</h3>
+          <div class="weak-list">
+            <div class="weak-item">
+              <div class="weak-subj"><span class="dot-history"></span> History of Kazakhstan</div>
+              <div class="weak-topic">Soviet Period (1917–1991)</div>
+              <div class="weak-score">40% accuracy</div>
+              <button class="tiny-btn" onclick="navigateTo('tests')">Practice →</button>
+            </div>
+            <div class="weak-item">
+              <div class="weak-subj"><span class="dot-math"></span> Mathematics</div>
+              <div class="weak-topic">Trigonometric Functions</div>
+              <div class="weak-score">58% accuracy</div>
+              <button class="tiny-btn" onclick="navigateTo('tests')">Practice →</button>
+            </div>
+            <div class="weak-item">
+              <div class="weak-subj"><span class="dot-cs"></span> Computer Science</div>
+              <div class="weak-topic">Graph Theory</div>
+              <div class="weak-score">62% accuracy</div>
+              <button class="tiny-btn" onclick="navigateTo('tests')">Practice →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE: SUBJECTS -->
+    <section class="page" id="page-subjects">
+      <div class="page-header">
+        <h1>📂 Subjects</h1>
+        <p class="page-sub">Browse and manage your study materials by subject.</p>
+      </div>
+
+      <div class="subjects-toolbar">
+        <div class="search-subjects">
+          <input type="text" placeholder="🔍 Search materials…" id="subject-search" oninput="filterSubjects()" />
+        </div>
+        <button class="btn-primary" onclick="showAddSubject()">+ Add Subject</button>
+      </div>
+
+      <div class="subjects-grid" id="subjects-grid">
+        <div class="subject-card" data-subject="math">
+          <div class="subj-card-icon" style="background:linear-gradient(135deg,#667eea,#764ba2)">📐</div>
+          <div class="subj-card-body">
+            <h3>Mathematics</h3>
+            <div class="subj-tags">
+              <span class="tag">Algebra</span>
+              <span class="tag">Geometry</span>
+              <span class="tag">Calculus</span>
+            </div>
+            <div class="subj-stats">
+              <span>36 notes</span>
+              <span>•</span>
+              <span>142 cards</span>
+              <span>•</span>
+              <span>12 tests</span>
+            </div>
+            <div class="subj-progress-bar"><div style="width:72%"></div></div>
+            <div class="subj-pct">72% mastered</div>
+          </div>
+          <button class="subj-open-btn" onclick="navigateTo('notes')">Open →</button>
+        </div>
+
+        <div class="subject-card" data-subject="cs">
+          <div class="subj-card-icon" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">💻</div>
+          <div class="subj-card-body">
+            <h3>Computer Science</h3>
+            <div class="subj-tags">
+              <span class="tag">Algorithms</span>
+              <span class="tag">Data Structures</span>
+              <span class="tag">OOP</span>
+            </div>
+            <div class="subj-stats">
+              <span>28 notes</span>
+              <span>•</span>
+              <span>98 cards</span>
+              <span>•</span>
+              <span>8 tests</span>
+            </div>
+            <div class="subj-progress-bar"><div style="width:55%"></div></div>
+            <div class="subj-pct">55% mastered</div>
+          </div>
+          <button class="subj-open-btn" onclick="navigateTo('notes')">Open →</button>
+        </div>
+
+        <div class="subject-card" data-subject="history">
+          <div class="subj-card-icon" style="background:linear-gradient(135deg,#f093fb,#f5576c)">🏛️</div>
+          <div class="subj-card-body">
+            <h3>History of Kazakhstan</h3>
+            <div class="subj-tags">
+              <span class="tag">Ancient KZ</span>
+              <span class="tag">Soviet Era</span>
+              <span class="tag">Independence</span>
+            </div>
+            <div class="subj-stats">
+              <span>45 notes</span>
+              <span>•</span>
+              <span>180 cards</span>
+              <span>•</span>
+              <span>15 tests</span>
+            </div>
+            <div class="subj-progress-bar"><div style="width:40%"></div></div>
+            <div class="subj-pct">40% mastered</div>
+          </div>
+          <button class="subj-open-btn" onclick="navigateTo('notes')">Open →</button>
+        </div>
+
+        <div class="subject-card" data-subject="biology">
+          <div class="subj-card-icon" style="background:linear-gradient(135deg,#43e97b,#38f9d7)">🌿</div>
+          <div class="subj-card-body">
+            <h3>Biology</h3>
+            <div class="subj-tags">
+              <span class="tag">Cell Biology</span>
+              <span class="tag">Genetics</span>
+              <span class="tag">Ecology</span>
+            </div>
+            <div class="subj-stats">
+              <span>20 notes</span>
+              <span>•</span>
+              <span>75 cards</span>
+              <span>•</span>
+              <span>5 tests</span>
+            </div>
+            <div class="subj-progress-bar"><div style="width:25%"></div></div>
+            <div class="subj-pct">25% mastered</div>
+          </div>
+          <button class="subj-open-btn" onclick="navigateTo('notes')">Open →</button>
+        </div>
+
+        <div class="subject-card" data-subject="physics">
+          <div class="subj-card-icon" style="background:linear-gradient(135deg,#fa709a,#fee140)">⚡</div>
+          <div class="subj-card-body">
+            <h3>Physics</h3>
+            <div class="subj-tags">
+              <span class="tag">Mechanics</span>
+              <span class="tag">Electricity</span>
+              <span class="tag">Optics</span>
+            </div>
+            <div class="subj-stats">
+              <span>14 notes</span>
+              <span>•</span>
+              <span>56 cards</span>
+              <span>•</span>
+              <span>4 tests</span>
+            </div>
+            <div class="subj-progress-bar"><div style="width:18%"></div></div>
+            <div class="subj-pct">18% mastered</div>
+          </div>
+          <button class="subj-open-btn" onclick="navigateTo('notes')">Open →</button>
+        </div>
+
+        <div class="subject-card add-subject-card" onclick="showAddSubject()">
+          <div class="add-subject-inner">
+            <div class="add-icon">+</div>
+            <p>Add New Subject</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FLOATING MINI PLAYER (background audio mode) -->
+  <div class="mini-player" id="mini-player" style="display:none">
+    <span class="mini-icon">🎧</span>
+    <div class="mini-info">
+      <div class="mini-title">History: Independence Era</div>
+      <div class="mini-time">1:24 / 4:32</div>
+    </div>
+    <button class="mini-play" onclick="togglePlay()">▶</button>
+    <button class="mini-close" onclick="closeMiniPlayer()">✕</button>
+  </div>
+
+</div>
+
+<!-- XP TOAST NOTIFICATION -->
+<div class="xp-toast" id="xp-toast">+50 XP 🎉</div>
+
+<!-- SETTINGS MODAL -->
+<div class="settings-overlay" id="settings-overlay" style="display:none">
+  <div class="settings-panel">
+    <div class="settings-header">
+      <h2 data-i18n="settings.title">⚙️ Settings</h2>
+      <button class="icon-btn" onclick="closeSettings()">✕</button>
+    </div>
+
+    <div class="settings-section">
+      <h3 data-i18n="settings.language">🌐 Language</h3>
+      <p class="settings-sub" data-i18n="settings.languageSub">Choose your preferred interface language</p>
+      <div class="lang-options" id="lang-options">
+        <button class="lang-btn active" data-lang="en" onclick="switchLanguage('en')">
+          <span>🇬🇧</span> English
+        </button>
+        <button class="lang-btn" data-lang="ru" onclick="switchLanguage('ru')">
+          <span>🇷🇺</span> Русский
+        </button>
+        <button class="lang-btn" data-lang="kk" onclick="switchLanguage('kk')">
+          <span>🇰🇿</span> Қазақша
+        </button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3 data-i18n="settings.account">👤 Account</h3>
+      <div class="settings-info-row">
+        <span data-i18n="settings.email">Email</span>
+        <span id="settings-email">—</span>
+      </div>
+      <div class="settings-info-row">
+        <span data-i18n="settings.memberSince">Member since</span>
+        <span id="settings-member-since">—</span>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3 data-i18n="settings.selectedSubjects">📚 Selected Subjects</h3>
+      <div id="settings-subjects" class="settings-subjects-list"></div>
+    </div>
+
+    <div class="settings-section danger">
+      <button class="btn-ghost full-btn" onclick="handleLogout()" style="color:var(--danger);border-color:var(--danger)" data-i18n="settings.logoutBtn">🚪 Log Out</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "enthelper",
+  "version": "1.0.0",
+  "description": "Smart Exam Prep for Kazakhstan Students",
+  "main": "app.js",
+  "scripts": {
+    "start": "serve . -p 3000",
+    "dev": "serve . -p 3000",
+    "build": "echo \"No build step required for Vanilla JS.\"",
+    "deploy": "npx --yes firebase-tools deploy"
+  },
+  "dependencies": {
+    "serve": "^14.2.0"
+  }
+}
