@@ -13,11 +13,11 @@ import {
 } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCkWsdNt9agscGeBhXn9AAEJP4YR4SOOvg",
-  authDomain: "studai-9b11d.firebaseapp.com",
-  databaseURL: "https://studai-9b11d-default-rtdb.firebaseio.com",
-  projectId: "studai-9b11d",
-  storageBucket: "studai-9b11d.firebasestorage.app",
+  apiKey: "######",
+  authDomain: "######",
+  databaseURL: "######",
+  projectId: "#####",
+  storageBucket: "######",
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -199,8 +199,8 @@ export const AIContentService = {
 // ============================================================
 //  AI SERVICE  (Google Gemini via REST)
 // ============================================================
-const GEMINI_KEY = "AIzaSyA5N8WqAKZybCc_iTP2v-M3HoVP4q5M8Yw";
-const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+const GEMINI_KEY = "##########";
+const GEMINI_BASE = "#############";
 
 async function geminiCall(prompt) {
   const controller = new AbortController();
